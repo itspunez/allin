@@ -1,0 +1,80 @@
+sources:
+  - id: iampedii-whitedns
+    name: WhiteDNS Sub
+    url: "https://raw.githubusercontent.com/iampedii/whitedns-sub/refs/heads/main/base64.txt"
+    enabled: true
+    weight: 100
+    format: auto
+    tags: [v2ray, base64, github]
+
+  - id: sany0116-auto
+    name: Sany0116 Auto
+    url: "https://sany0116.jullianna.workers.dev/auto?b64"
+    enabled: true
+    weight: 100
+    format: auto
+    tags: [v2ray, hiddify, base64]
+
+  - id: avencores-goida
+    name: AvenCores Goida VPN Configs
+    url: "https://raw.githubusercontent.com/AvenCores/goida-vpn-configs/refs/heads/main/githubmirror/6.txt"
+    enabled: true
+    weight: 100
+    format: auto
+    tags: [v2ray, github]
+
+  - id: 10ium-proxy-configs
+    name: 10ium Multi Proxy Config Fetcher
+    url: "https://raw.githubusercontent.com/10ium/multi-proxy-config-fetcher/refs/heads/main/configs/proxy_configs.txt#%F0%9F%91%BDAnonymous-%F0%9D%95%8F"
+    enabled: true
+    weight: 100
+    format: auto
+    tags: [v2ray, github]
+
+  - id: dpaste-5FDDSCJLZ
+    name: Dpaste V2Ray
+    url: "https://dpaste.com/5FDDSCJLZ"
+    enabled: true
+    weight: 90
+    format: auto
+    tags: [v2ray, dpaste]
+
+  - id: vless-balancer-6788
+    name: VLESS Balancer
+    url: "https://msk.vless-balancer.ru/sub/dXNlcl82Nzg4MzMxMjQ5LDE3Njk1MzUzMTkBqGm3A1STd#Subscription"
+    enabled: true
+    weight: 90
+    format: auto
+    tags: [vless, hiddify]
+
+  - id: gpucloud-htxml
+    name: GPUCloud HTXML
+    url: "https://s3c3.001.gpucloud.ru/dixsm/htxml"
+    enabled: true
+    weight: 90
+    format: auto
+    tags: [hiddify]
+
+  - id: mahdi0024-proxycollector
+    name: Mahdi0024 ProxyCollector
+    url: "https://raw.githubusercontent.com/Mahdi0024/ProxyCollector/master/sub/proxies.txt#proxies"
+    enabled: true
+    weight: 100
+    format: auto
+    tags: [hiddify, github]
+
+  - id: mrbihal-hddify
+    name: MrBihal Hddify
+    url: "https://raw.githubusercontent.com/MrBihal/Hddify/refs/heads/main/MDR"
+    enabled: true
+    weight: 100
+    format: auto
+    tags: [hiddify, github]
+
+  - id: vless-balancer-1005
+    name: VLESS Balancer NetAccount
+    url: "https://msk.vless-balancer.ru/sub/d2VsY29tZV8xNzcwMTI1MDAzXzEwMDUsMTc3MDEyNTAwNAG7ZZWaF9jt/#NetAccount"
+    enabled: true
+    weight: 90
+    format: auto
+    tags: [vless, hiddify]
