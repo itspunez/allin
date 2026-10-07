@@ -1,4 +1,6 @@
 import os
+import json
+from pathlib import Path
 import yaml
 from .fetch import fetch_url, decode_subscription
 from .parse import parse_text
@@ -17,13 +19,23 @@ def source_url(source):
         return os.getenv(env_name, "").strip()
     return str(source.get("url", "")).strip()
 
-def main():
+def load_sources():
     with open("sources.yml", "r", encoding="utf-8") as f:
-        registry = yaml.safe_load(f) or {}
+        manual = (yaml.safe_load(f) or {}).get("sources", [])
+    discovered = []
+    p = Path("state/discovered_sources.json")
+    if p.exists():
+        try:
+            discovered = list(json.loads(p.read_text(encoding="utf-8")).values())
+        except Exception:
+            pass
+    manual_ids = {s["id"] for s in manual}
+    return manual + [s for s in discovered if s.get("id") not in manual_ids]
 
+def main():
     db = DB()
     try:
-        for source in registry.get("sources", []):
+        for source in load_sources():
             if not source.get("enabled", False):
                 continue
 

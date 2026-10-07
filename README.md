@@ -1,94 +1,29 @@
-# Proxy Aggregator — Final MVP
+# Proxy Aggregator v2 — Auto Discovery
 
-این پروژه منابع subscription عمومی/شخصی را جمع‌آوری می‌کند، محتوا را decode/parse می‌کند، کانفیگ‌ها را normalize و dedupe می‌کند، برای source و config امتیاز freshness/reliability می‌سازد و خروجی‌های آماده مصرف تولید می‌کند.
+این نسخه علاوه بر ۱۰ source دستی، روزانه sourceهای عمومی جدید را از GitHub کشف می‌کند.
 
-## Pipeline
+## چرخه خودکار
+- Discovery: روزانه
+- Collection: هر ساعت
+- خروجی‌ها: بعد از هر collection بازسازی می‌شوند
+- Dependabot: هفتگی dependencyها و GitHub Actions را بررسی می‌کند
 
-sources.yml
-→ fetch
-→ decode
-→ parse
-→ normalize
-→ SQLite
-→ score
-→ export
+Discovery فقط public GitHub metadata/README و لینک‌های subscription منتشرشده را می‌خواند؛ active probing یا port scanning انجام نمی‌دهد.
 
-این نسخه روی availability/freshness و کیفیت داده تمرکز دارد و endpointهای شخص ثالث را active-probe یا port-scan نمی‌کند.
+## راه‌اندازی
+1. محتویات این ZIP را جایگزین نسخه قبلی در root همان repository کن.
+2. Commit و Push کن.
+3. Actions → **Discover public sources** → Run workflow را یک‌بار اجرا کن.
+4. سپس **Collect subscriptions** را Run کن.
+5. از این به بعد هر دو زمان‌بندی خودکار هستند.
 
-## Sources included
+## خروجی مهم
+`output/subscription.b64`
 
-۱۰ ورودی‌ای که داده شد در `sources.yml` قرار گرفته‌اند. مورد تکراری Mahdi0024 فقط یک بار ثبت شده است.
+همچنین:
+`all.txt`, `top100.txt`, `vless.txt`, `vmess.txt`, `trojan.txt`, `ss.txt`
 
-## اجرا روی سیستم شخصی
+`fast.txt` فعلاً score-based است و latency واقعی نیست.
 
-```bash
-python -m venv .venv
-# Windows:
-.venv\Scripts\activate
-# Linux/macOS:
-source .venv/bin/activate
-
-pip install -r requirements.txt
-python -m src.main
-```
-
-خروجی‌ها در `output/` ساخته می‌شوند.
-
-## خروجی‌ها
-
-- `all.txt`
-- `top100.txt`
-- `fast.txt` — در این MVP «fast» به معنی score-based است، نه latency واقعی.
-- `vless.txt`
-- `vmess.txt`
-- `trojan.txt`
-- `ss.txt`
-- `configs.json`
-- `sources.json`
-- `subscription.b64`
-
-`subscription.b64` یک feed Base64 از کانفیگ‌های deduplicated است.
-
-## GitHub Actions
-
-Workflow هر ساعت اجرا می‌شود و با `workflow_dispatch` هم دستی قابل اجراست.
-
-Workflow فقط `contents: write` می‌گیرد تا output/state را commit کند. GitHub مستند کرده که permissionها را می‌توان در خود workflow محدود کرد و `contents: write` برای نوشتن محتویات repository استفاده می‌شود.
-
-اگر repository شما private نیست، هیچ URL خصوصی را داخل `sources.yml` commit نکنید. برای URL خصوصی از GitHub Secret استفاده کنید.
-
-## Secret source
-
-برای source خصوصی می‌توانید به جای URL مستقیم از این ساختار استفاده کنید:
-
-```yaml
-- id: private-source
-  name: Private source
-  url_env: PRIVATE_SOURCE_URL
-  enabled: true
-  weight: 100
-  format: auto
-  tags: [private]
-```
-
-سپس در GitHub:
-Settings → Secrets and variables → Actions → New repository secret
-
-نام:
-`PRIVATE_SOURCE_URL`
-
-مقدار:
-URL subscription
-
-## Cloudflare Worker
-
-پوشه `worker/` یک cache/API ساده برای فایل‌های خروجی است.
-
-متغیر محیطی:
-`ORIGIN=https://YOUR-GITHUB-PAGES-ORIGIN`
-
-این Worker خودش collector نیست؛ فقط output را cache/proxy می‌کند.
-
-## نکته
-
-این پروژه فقط داده‌ای را که source منتشر کرده دریافت و پردازش می‌کند. تست latency یا اتصال واقعی به هزاران endpoint در این MVP وجود ندارد.
+## Self-update
+کد اصلی پروژه عمداً از اینترنت overwrite نمی‌شود. registry source و خروجی‌ها خودکار به‌روزرسانی می‌شوند و Dependabot برای update وابستگی‌ها Pull Request می‌سازد.

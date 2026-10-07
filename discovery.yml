@@ -1,0 +1,18 @@
+github:
+  enabled: true
+  max_repositories_per_query: 20
+  max_total_candidates: 100
+  queries:
+    - "vless subscription"
+    - "vmess subscription"
+    - "trojan subscription"
+    - "shadowsocks subscription"
+    - "clash subscription"
+    - "sing-box subscription"
+    - "proxy subscription"
+  allowed_hosts:
+    - raw.githubusercontent.com
+    - github.com
+    - gist.githubusercontent.com
+    - pastebin.com
+    - dpaste.com
