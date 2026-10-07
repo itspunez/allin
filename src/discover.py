@@ -25,9 +25,16 @@ def get(url,params=None):
         r.raise_for_status();return r
     raise RuntimeError("GitHub API retry/rate limit exhausted")
 def clean(url):
-    p=urlparse(url.rstrip(".,);]}>'\""))
-    if p.scheme not in ("http","https") or not p.netloc:return None
-    return p._replace(fragment="").geturl()
+    """Return a safe normalized URL, or None for malformed candidates."""
+    if not isinstance(url, str): return None
+    url=url.strip().rstrip(".,);]}>'\"")
+    if not url or len(url)>4096: return None
+    try:
+        p=urlparse(url)
+        if p.scheme not in ("http","https") or not p.netloc or not p.hostname: return None
+    except (ValueError,TypeError): return None
+    return p.geturl()
+
 def valid(url):
     p=urlparse(url);allowed=set(cfg()["github"].get("allowed_hosts",[]))
     return p.netloc.lower() in allowed and any(k in url.lower() for k in KEYWORDS)
@@ -47,12 +54,21 @@ def run():
             for x in data.get("items",[]):repos[x["full_name"]]=x
         except Exception as e:print("[DISCOVERY]",q,e)
     found={}
+    bad_urls=0
+    failed_repos=0
     for repo in list(repos.values())[:int(c.get("max_total_candidates",100))]:
-        try:text=readme(repo["full_name"])
-        except Exception:continue
+        try:
+            text=readme(repo["full_name"])
+        except Exception as e:
+            failed_repos += 1
+            print("[DISCOVERY] README skipped:",repo.get("full_name","?"),type(e).__name__)
+            continue
         for raw in URL_RE.findall(text):
             u=clean(raw)
-            if not u or not valid(u):continue
+            if not u:
+                bad_urls += 1
+                continue
+            if not valid(u):continue
             found[sid(u)]={"id":sid(u),"name":"GitHub: "+repo["full_name"],"url":u,
               "enabled":True,"weight":min(100,50+min(30,int(repo.get("stargazers_count",0)))+min(20,int(repo.get("forks_count",0)))),
               "format":"auto","tags":["discovered","github"],"repo":repo["full_name"],
@@ -60,5 +76,5 @@ def run():
               "repo_updated_at":repo.get("updated_at","")}
     STATE.parent.mkdir(parents=True,exist_ok=True)
     STATE.write_text(json.dumps(found,ensure_ascii=False,indent=2),encoding="utf-8")
-    print(f"[DISCOVERY] {len(found)} sources")
+    print(f"[DISCOVERY] {len(found)} sources | malformed URLs skipped: {bad_urls} | README failures: {failed_repos}")
 if __name__=="__main__":run()
