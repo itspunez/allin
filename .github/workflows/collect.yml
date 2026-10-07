@@ -1,0 +1,45 @@
+name: Collect subscriptions
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 * * * *"
+Q
+permissions:
+  contents: write
+
+concurrency:
+  group: subscription-collector
+  cancel-in-progress: true
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Collect and export
+        env:
+          PRIVATE_SOURCE_URL: ${{ secrets.PRIVATE_SOURCE_URL }}
+        run: python -m src.main
+
+      - name: Commit generated output
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add output/
+          git add state/ || true
+          git diff --cached --quiet || git commit -m "chore: update aggregated subscriptions"
+          git push
